@@ -12,13 +12,15 @@
       <div class="topbar">
         <div>
           <h1>星际快递员</h1>
-          <p class="subtitle">驾驶机器人快递员，躲开陨石，收集能量晶体和护盾！</p>
+          <p class="subtitle">驾驶机器人快递员，躲开陨石，收集晶体、护盾、磁铁和维修包！</p>
         </div>
         <div class="hud-inline">
+          <div class="hud-pill">模式 <strong id="modeLabel">普通</strong></div>
           <div class="hud-pill">分数 <strong id="score">0</strong></div>
           <div class="hud-pill">最高分 <strong id="highScore">0</strong></div>
           <div class="hud-pill">生命 <strong id="lives">3</strong></div>
           <div class="hud-pill">等级 <strong id="level">1</strong></div>
+          <div class="hud-pill">状态 <strong id="powerStatus">无</strong></div>
         </div>
       </div>
 
@@ -29,8 +31,22 @@
             <img id="splashImage" alt="机器人快递员" src="assets/splash-robot.svg" />
             <h2 id="overlayTitle">准备启程</h2>
             <p id="overlayText">
-              使用方向键 / WASD 或下方按钮移动，躲开陨石，收集蓝色晶体和能量护盾。
+              选择难度后开始任务。躲开陨石，收集蓝色晶体和各种能量道具。
             </p>
+            <div class="difficulty-panel" aria-label="难度选择">
+              <button class="difficulty-option" data-mode="easy" type="button">
+                <span>轻松</span>
+                <small>生命更多，节奏更慢</small>
+              </button>
+              <button class="difficulty-option active" data-mode="normal" type="button">
+                <span>普通</span>
+                <small>标准快递任务</small>
+              </button>
+              <button class="difficulty-option" data-mode="hard" type="button">
+                <span>困难</span>
+                <small>陨石更快，得分更高</small>
+              </button>
+            </div>
             <div class="overlay-actions">
               <button id="startButton">开始游戏</button>
               <button id="restartButton" class="secondary hidden">重新开始</button>
@@ -44,9 +60,10 @@
           <h3>玩法说明</h3>
           <ul>
             <li>收集晶体：+10 分</li>
-            <li>收集护盾：可抵挡下一次陨石撞击</li>
+            <li>收集护盾：+5 分，并抵挡下一次陨石撞击</li>
+            <li>收集磁铁：+8 分，短时间吸引附近奖励道具</li>
+            <li>收集维修包：+12 分，并回复 1 点生命，满生命时额外加分</li>
             <li>坚持飞行会持续得分，并自动保存最高分</li>
-            <li>撞到陨石会损失 1 点生命</li>
             <li>每 15 秒提升 1 个等级，难度会上升</li>
           </ul>
         </div>
