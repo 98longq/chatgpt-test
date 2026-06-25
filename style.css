@@ -1,0 +1,217 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #081120;
+  --panel: rgba(10, 17, 32, 0.78);
+  --line: rgba(255, 255, 255, 0.12);
+  --text: #eef6ff;
+  --muted: #9db2d1;
+  --accent: #58c5ff;
+  --accent-2: #7d6bff;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background:
+    radial-gradient(circle at top, #15295a 0%, #081120 55%),
+    linear-gradient(180deg, #09111f, #040812);
+  color: var(--text);
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.game-shell {
+  width: min(1160px, 100%);
+  background: rgba(6, 12, 24, 0.86);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  padding: 18px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 42px);
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.hud-inline {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hud-pill {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+}
+
+.hud-pill strong {
+  color: white;
+  margin-left: 8px;
+  font-size: 1.05rem;
+}
+
+.game-area {
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #07101f;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 7, 16, 0.58);
+  backdrop-filter: blur(6px);
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-card {
+  width: min(520px, calc(100% - 24px));
+  padding: 18px;
+  border-radius: 24px;
+  background: rgba(9, 16, 30, 0.93);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  text-align: center;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
+}
+
+.overlay-card img {
+  width: min(260px, 70%);
+  border-radius: 20px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.35));
+}
+
+.overlay-card h2 {
+  margin: 8px 0 8px;
+  font-size: 1.8rem;
+}
+
+.overlay-card p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.overlay-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  border-radius: 14px;
+  padding: 12px 20px;
+  color: white;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(66, 131, 255, 0.25);
+}
+
+button.secondary {
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+button.hidden {
+  display: none;
+}
+
+.bottom-panel {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 16px;
+}
+
+.tip-box,
+.controls-box {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.tip-box h3,
+.controls-box h3 {
+  margin-top: 0;
+}
+
+.tip-box ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.controls-grid {
+  width: 220px;
+  max-width: 100%;
+  margin: 10px auto 6px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.ctrl {
+  min-height: 58px;
+  font-size: 1.5rem;
+  padding: 0;
+}
+
+.control-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+@media (max-width: 860px) {
+  .bottom-panel {
+    grid-template-columns: 1fr;
+  }
+}
