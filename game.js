@@ -7,16 +7,64 @@ const overlayText = document.getElementById("overlayText");
 const startButton = document.getElementById("startButton");
 const restartButton = document.getElementById("restartButton");
 const pauseButton = document.getElementById("pauseButton");
+const difficultyButtons = document.querySelectorAll(".difficulty-option");
 
 const scoreEl = document.getElementById("score");
 const highScoreEl = document.getElementById("highScore");
 const livesEl = document.getElementById("lives");
 const levelEl = document.getElementById("level");
+const modeLabelEl = document.getElementById("modeLabel");
+const powerStatusEl = document.getElementById("powerStatus");
 
 const W = canvas.width;
 const H = canvas.height;
 const input = { left: false, right: false, up: false, down: false };
 const HIGH_SCORE_KEY = "interstellarCourierHighScore";
+
+const DIFFICULTIES = {
+  easy: {
+    label: "轻松",
+    lives: 4,
+    playerSpeed: 390,
+    scoreMultiplier: 0.9,
+    asteroidSpeedMultiplier: 0.84,
+    asteroidIntervalBonus: 0.18,
+    crystalInterval: 1.3,
+    shieldInterval: 8,
+    magnetInterval: 10,
+    repairInterval: 12
+  },
+  normal: {
+    label: "普通",
+    lives: 3,
+    playerSpeed: 360,
+    scoreMultiplier: 1,
+    asteroidSpeedMultiplier: 1,
+    asteroidIntervalBonus: 0,
+    crystalInterval: 1.5,
+    shieldInterval: 9.5,
+    magnetInterval: 11.5,
+    repairInterval: 14
+  },
+  hard: {
+    label: "困难",
+    lives: 2,
+    playerSpeed: 350,
+    scoreMultiplier: 1.25,
+    asteroidSpeedMultiplier: 1.18,
+    asteroidIntervalBonus: -0.1,
+    crystalInterval: 1.7,
+    shieldInterval: 11.5,
+    magnetInterval: 13,
+    repairInterval: 16
+  }
+};
+
+let selectedDifficulty = "normal";
+
+function getDifficulty() {
+  return DIFFICULTIES[selectedDifficulty] || DIFFICULTIES.normal;
+}
 
 function readHighScore() {
   const saved = Number(localStorage.getItem(HIGH_SCORE_KEY));
@@ -38,7 +86,9 @@ const assets = {
   player: createImage("assets/player.svg"),
   asteroid: createImage("assets/asteroid.svg"),
   crystal: createImage("assets/crystal.svg"),
-  shield: createImage("assets/shield.svg")
+  shield: createImage("assets/shield.svg"),
+  magnet: createImage("assets/magnet.svg"),
+  repair: createImage("assets/repair.svg")
 };
 
 const game = {
@@ -49,24 +99,46 @@ const game = {
   score: 0,
   highScore: readHighScore(),
   lives: 3,
+  maxLives: 3,
   level: 1,
   time: 0,
   spawnTimer: 0,
   crystalTimer: 0,
   shieldTimer: 0,
+  magnetTimer: 0,
+  repairTimer: 0,
   flashTimer: 0,
+  bonusText: "",
+  bonusTimer: 0,
   player: null,
   asteroids: [],
   crystals: [],
   shields: [],
+  magnets: [],
+  repairs: [],
   stars: []
 };
 
+function formatTimer(value) {
+  return `${Math.ceil(value)}秒`;
+}
+
 function updateHud() {
+  const difficulty = getDifficulty();
+  const activePowers = [];
+
   scoreEl.textContent = Math.floor(game.score);
   highScoreEl.textContent = Math.max(game.highScore, Math.floor(game.score));
-  livesEl.textContent = game.lives;
+  livesEl.textContent = `${game.lives}/${game.maxLives}`;
   levelEl.textContent = game.level;
+  modeLabelEl.textContent = difficulty.label;
+
+  if (game.player) {
+    if (game.player.shield > 0) activePowers.push(`护盾${formatTimer(game.player.shield)}`);
+    if (game.player.magnet > 0) activePowers.push(`磁吸${formatTimer(game.player.magnet)}`);
+  }
+
+  powerStatusEl.textContent = activePowers.length ? activePowers.join(" · ") : "无";
 }
 
 function hideOverlay() {
@@ -76,9 +148,12 @@ function hideOverlay() {
 function showStartOverlay() {
   overlay.classList.remove("hidden");
   overlayTitle.textContent = "准备启程";
-  overlayText.textContent = "使用方向键 / WASD 或下方按钮移动，躲开陨石，收集蓝色晶体和能量护盾。";
+  overlayText.textContent = "选择难度后开始任务。躲开陨石，收集蓝色晶体和各种能量道具。";
   startButton.classList.remove("hidden");
   restartButton.classList.add("hidden");
+  difficultyButtons.forEach((button) => {
+    button.disabled = false;
+  });
 }
 
 function updateHighScore() {
@@ -93,44 +168,66 @@ function showGameOverOverlay() {
   updateHighScore();
   overlay.classList.remove("hidden");
   overlayTitle.textContent = "任务结束";
-  overlayText.textContent = `本局 ${Math.floor(game.score)} 分，历史最高 ${game.highScore} 分，最高到达 ${game.level} 级。再来一局吧！`;
+  overlayText.textContent = `本局 ${Math.floor(game.score)} 分，历史最高 ${game.highScore} 分，${getDifficulty().label}模式下最高到达 ${game.level} 级。再来一局吧！`;
   startButton.classList.add("hidden");
   restartButton.classList.remove("hidden");
+  difficultyButtons.forEach((button) => {
+    button.disabled = false;
+  });
   updateHud();
 }
 
+function showFloatingBonus(text) {
+  game.bonusText = text;
+  game.bonusTimer = 1.2;
+}
+
 function resetGame() {
+  const difficulty = getDifficulty();
+
   game.started = true;
   game.running = true;
   game.paused = false;
   game.over = false;
   game.score = 0;
-  game.lives = 3;
+  game.lives = difficulty.lives;
+  game.maxLives = difficulty.lives;
   game.level = 1;
   game.time = 0;
   game.spawnTimer = 0;
   game.crystalTimer = 0;
   game.shieldTimer = 0;
+  game.magnetTimer = 0;
+  game.repairTimer = 0;
   game.flashTimer = 0;
+  game.bonusText = "";
+  game.bonusTimer = 0;
   game.asteroids = [];
   game.crystals = [];
   game.shields = [];
-  game.stars = Array.from({ length: 26 }, () => ({
+  game.magnets = [];
+  game.repairs = [];
+  game.stars = Array.from({ length: 32 }, () => ({
     x: Math.random() * W,
     y: Math.random() * H,
     r: 1 + Math.random() * 2,
     a: 0.25 + Math.random() * 0.5,
-    s: 8 + Math.random() * 18
+    s: 8 + Math.random() * 22
   }));
   game.player = {
     x: W * 0.5 - 35,
     y: H - 120,
     w: 70,
     h: 70,
-    speed: 360,
+    speed: difficulty.playerSpeed,
     invincible: 0,
-    shield: 0
+    shield: 0,
+    magnet: 0
   };
+
+  difficultyButtons.forEach((button) => {
+    button.disabled = true;
+  });
   updateHud();
   hideOverlay();
 }
@@ -140,13 +237,14 @@ function rectsOverlap(a, b) {
 }
 
 function spawnAsteroid() {
+  const difficulty = getDifficulty();
   const size = 34 + Math.random() * 40;
   game.asteroids.push({
     x: Math.random() * (W - size),
     y: -size,
     w: size,
     h: size,
-    vy: 180 + Math.random() * 140 + game.level * 22,
+    vy: (180 + Math.random() * 140 + game.level * 22) * difficulty.asteroidSpeedMultiplier,
     drift: (Math.random() * 2 - 1) * 45,
     rotation: Math.random() * Math.PI * 2,
     spin: (Math.random() * 2 - 1) * 2.2
@@ -178,6 +276,32 @@ function spawnShield() {
   });
 }
 
+function spawnMagnet() {
+  const size = 44 + Math.random() * 10;
+  game.magnets.push({
+    x: Math.random() * (W - size),
+    y: -size,
+    w: size,
+    h: size,
+    vy: 120 + Math.random() * 70,
+    sway: Math.random() * Math.PI * 2,
+    pulse: Math.random() * Math.PI * 2
+  });
+}
+
+function spawnRepair() {
+  const size = 42 + Math.random() * 12;
+  game.repairs.push({
+    x: Math.random() * (W - size),
+    y: -size,
+    w: size,
+    h: size,
+    vy: 118 + Math.random() * 68,
+    sway: Math.random() * Math.PI * 2,
+    pulse: Math.random() * Math.PI * 2
+  });
+}
+
 function takeHit() {
   if (game.player.invincible > 0) return;
 
@@ -185,6 +309,7 @@ function takeHit() {
     game.player.shield = 0;
     game.player.invincible = 0.8;
     game.flashTimer = 0.25;
+    showFloatingBonus("护盾抵挡！");
     updateHud();
     return;
   }
@@ -201,15 +326,45 @@ function takeHit() {
   updateHud();
 }
 
+function pullTowardPlayer(item, dt, range = 190, strength = 620) {
+  if (!game.player || game.player.magnet <= 0) return;
+
+  const playerCenterX = game.player.x + game.player.w / 2;
+  const playerCenterY = game.player.y + game.player.h / 2;
+  const itemCenterX = item.x + item.w / 2;
+  const itemCenterY = item.y + item.h / 2;
+  const dx = playerCenterX - itemCenterX;
+  const dy = playerCenterY - itemCenterY;
+  const distance = Math.hypot(dx, dy);
+
+  if (distance > 0 && distance < range) {
+    const pull = (1 - distance / range) * strength * dt;
+    item.x += (dx / distance) * pull;
+    item.y += (dy / distance) * pull;
+  }
+}
+
+function updateFallingItem(item, dt, swaySpeed, swayAmount) {
+  item.y += item.vy * dt;
+  item.sway += dt * swaySpeed;
+  item.pulse += dt * 5;
+  item.x += Math.sin(item.sway) * swayAmount * dt;
+  pullTowardPlayer(item, dt);
+}
+
 function update(dt) {
   if (!game.running || game.paused) return;
 
+  const difficulty = getDifficulty();
+
   game.time += dt;
   game.level = 1 + Math.floor(game.time / 15);
-  game.score += dt * (5 + game.level * 0.6);
+  game.score += dt * (5 + game.level * 0.6) * difficulty.scoreMultiplier;
   game.player.invincible = Math.max(0, game.player.invincible - dt);
   game.player.shield = Math.max(0, game.player.shield - dt);
+  game.player.magnet = Math.max(0, game.player.magnet - dt);
   game.flashTimer = Math.max(0, game.flashTimer - dt);
+  game.bonusTimer = Math.max(0, game.bonusTimer - dt);
 
   const moveX = (input.right ? 1 : 0) - (input.left ? 1 : 0);
   const moveY = (input.down ? 1 : 0) - (input.up ? 1 : 0);
@@ -220,7 +375,7 @@ function update(dt) {
   game.player.x = Math.max(10, Math.min(W - game.player.w - 10, game.player.x));
   game.player.y = Math.max(20, Math.min(H - game.player.h - 10, game.player.y));
 
-  const asteroidInterval = Math.max(0.28, 1.0 - game.level * 0.05);
+  const asteroidInterval = Math.max(0.22, 1.0 + difficulty.asteroidIntervalBonus - game.level * 0.05);
   game.spawnTimer += dt;
   if (game.spawnTimer >= asteroidInterval) {
     game.spawnTimer = 0;
@@ -228,16 +383,30 @@ function update(dt) {
   }
 
   game.crystalTimer += dt;
-  if (game.crystalTimer >= 1.5) {
+  if (game.crystalTimer >= difficulty.crystalInterval) {
     game.crystalTimer = 0;
     spawnCrystal();
   }
 
-  const shieldInterval = Math.max(5.5, 9.5 - game.level * 0.2);
+  const shieldInterval = Math.max(5.5, difficulty.shieldInterval - game.level * 0.2);
   game.shieldTimer += dt;
   if (game.shieldTimer >= shieldInterval) {
     game.shieldTimer = 0;
     spawnShield();
+  }
+
+  const magnetInterval = Math.max(6.5, difficulty.magnetInterval - game.level * 0.16);
+  game.magnetTimer += dt;
+  if (game.magnetTimer >= magnetInterval) {
+    game.magnetTimer = 0;
+    spawnMagnet();
+  }
+
+  const repairInterval = Math.max(8, difficulty.repairInterval - game.level * 0.12);
+  game.repairTimer += dt;
+  if (game.repairTimer >= repairInterval) {
+    game.repairTimer = 0;
+    spawnRepair();
   }
 
   game.stars.forEach((star) => {
@@ -251,6 +420,8 @@ function update(dt) {
   game.asteroids = game.asteroids.filter((a) => a.y < H + a.h + 10);
   game.crystals = game.crystals.filter((c) => c.y < H + c.h + 10);
   game.shields = game.shields.filter((s) => s.y < H + s.h + 10);
+  game.magnets = game.magnets.filter((m) => m.y < H + m.h + 10);
+  game.repairs = game.repairs.filter((r) => r.y < H + r.h + 10);
 
   for (const asteroid of game.asteroids) {
     asteroid.y += asteroid.vy * dt;
@@ -268,22 +439,49 @@ function update(dt) {
     crystal.y += crystal.vy * dt;
     crystal.sway += dt * 4;
     crystal.x += Math.sin(crystal.sway) * 24 * dt;
+    pullTowardPlayer(crystal, dt, 210, 720);
     if (rectsOverlap(game.player, crystal)) {
       crystal.y = H + 200;
       game.score += 10;
+      showFloatingBonus("+10 晶体");
       updateHud();
     }
   }
 
   for (const shield of game.shields) {
-    shield.y += shield.vy * dt;
-    shield.sway += dt * 3;
-    shield.pulse += dt * 5;
-    shield.x += Math.sin(shield.sway) * 18 * dt;
+    updateFallingItem(shield, dt, 3, 18);
     if (rectsOverlap(game.player, shield)) {
       shield.y = H + 200;
       game.player.shield = 7;
       game.score += 5;
+      showFloatingBonus("+5 护盾");
+      updateHud();
+    }
+  }
+
+  for (const magnet of game.magnets) {
+    updateFallingItem(magnet, dt, 3.4, 18);
+    if (rectsOverlap(game.player, magnet)) {
+      magnet.y = H + 200;
+      game.player.magnet = 8;
+      game.score += 8;
+      showFloatingBonus("+8 磁吸");
+      updateHud();
+    }
+  }
+
+  for (const repair of game.repairs) {
+    updateFallingItem(repair, dt, 3.2, 16);
+    if (rectsOverlap(game.player, repair)) {
+      repair.y = H + 200;
+      if (game.lives < game.maxLives) {
+        game.lives += 1;
+        game.score += 12;
+        showFloatingBonus("+1 生命");
+      } else {
+        game.score += 22;
+        showFloatingBonus("+22 满血奖励");
+      }
       updateHud();
     }
   }
@@ -344,7 +542,33 @@ function drawPlayerShield() {
   ctx.restore();
 }
 
+function drawPlayerMagnet() {
+  if (!game.player || game.player.magnet <= 0) return;
+
+  const cx = game.player.x + game.player.w / 2;
+  const cy = game.player.y + game.player.h / 2;
+  const radius = 74 + Math.sin(game.time * 6) * 6;
+
+  ctx.save();
+  ctx.globalAlpha = 0.34;
+  ctx.strokeStyle = "#ffc93b";
+  ctx.lineWidth = 3;
+  ctx.setLineDash([12, 10]);
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = 0.18;
+  ctx.strokeStyle = "#67e1ff";
+  ctx.lineWidth = 8;
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius + 10, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawPlayer() {
+  drawPlayerMagnet();
   drawPlayerShield();
   if (game.player.invincible > 0 && Math.floor(game.player.invincible * 10) % 2 === 0) {
     ctx.globalAlpha = 0.35;
@@ -373,16 +597,38 @@ function drawCrystals() {
   }
 }
 
-function drawShields() {
-  for (const shield of game.shields) {
-    const scale = 1 + Math.sin(shield.pulse) * 0.06;
+function drawPowerUps() {
+  const drawItem = (item, image) => {
+    const scale = 1 + Math.sin(item.pulse) * 0.06;
     ctx.save();
-    ctx.translate(shield.x + shield.w / 2, shield.y + shield.h / 2);
-    ctx.rotate(Math.sin(shield.sway) * 0.16);
+    ctx.translate(item.x + item.w / 2, item.y + item.h / 2);
+    ctx.rotate(Math.sin(item.sway) * 0.16);
     ctx.scale(scale, scale);
-    ctx.drawImage(assets.shield, -shield.w / 2, -shield.h / 2, shield.w, shield.h);
+    ctx.drawImage(image, -item.w / 2, -item.h / 2, item.w, item.h);
     ctx.restore();
-  }
+  };
+
+  for (const shield of game.shields) drawItem(shield, assets.shield);
+  for (const magnet of game.magnets) drawItem(magnet, assets.magnet);
+  for (const repair of game.repairs) drawItem(repair, assets.repair);
+}
+
+function drawBonusText() {
+  if (!game.player || game.bonusTimer <= 0 || !game.bonusText) return;
+
+  const alpha = Math.min(1, game.bonusTimer);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.font = "bold 22px Segoe UI";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#ffffff";
+  ctx.strokeStyle = "rgba(5, 14, 32, 0.8)";
+  ctx.lineWidth = 5;
+  const x = game.player.x + game.player.w / 2;
+  const y = game.player.y - 18 - (1.2 - game.bonusTimer) * 18;
+  ctx.strokeText(game.bonusText, x, y);
+  ctx.fillText(game.bonusText, x, y);
+  ctx.restore();
 }
 
 function drawEffects() {
@@ -390,6 +636,8 @@ function drawEffects() {
     ctx.fillStyle = `rgba(255, 100, 100, ${game.flashTimer * 0.18})`;
     ctx.fillRect(0, 0, W, H);
   }
+
+  drawBonusText();
 
   if (game.paused) {
     ctx.fillStyle = "rgba(2, 6, 14, 0.55)";
@@ -408,7 +656,7 @@ function render() {
   drawBackground();
   drawHudPanel();
   drawCrystals();
-  drawShields();
+  drawPowerUps();
   drawAsteroids();
   if (game.player) drawPlayer();
   drawEffects();
@@ -457,6 +705,21 @@ function bindTouchButton(btn, dir) {
 for (const btn of document.querySelectorAll(".ctrl")) {
   bindTouchButton(btn, btn.dataset.dir);
 }
+
+function selectDifficulty(mode) {
+  if (game.running) return;
+  if (!DIFFICULTIES[mode]) return;
+
+  selectedDifficulty = mode;
+  difficultyButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.mode === mode);
+  });
+  updateHud();
+}
+
+difficultyButtons.forEach((button) => {
+  button.addEventListener("click", () => selectDifficulty(button.dataset.mode));
+});
 
 function togglePause() {
   if (!game.started || game.over) return;
