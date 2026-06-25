@@ -9,12 +9,23 @@ const restartButton = document.getElementById("restartButton");
 const pauseButton = document.getElementById("pauseButton");
 
 const scoreEl = document.getElementById("score");
+const highScoreEl = document.getElementById("highScore");
 const livesEl = document.getElementById("lives");
 const levelEl = document.getElementById("level");
 
 const W = canvas.width;
 const H = canvas.height;
 const input = { left: false, right: false, up: false, down: false };
+const HIGH_SCORE_KEY = "interstellarCourierHighScore";
+
+function readHighScore() {
+  const saved = Number(localStorage.getItem(HIGH_SCORE_KEY));
+  return Number.isFinite(saved) ? saved : 0;
+}
+
+function saveHighScore(score) {
+  localStorage.setItem(HIGH_SCORE_KEY, String(Math.floor(score)));
+}
 
 function createImage(src) {
   const img = new Image();
@@ -26,7 +37,8 @@ const assets = {
   background: createImage("assets/space-bg.svg"),
   player: createImage("assets/player.svg"),
   asteroid: createImage("assets/asteroid.svg"),
-  crystal: createImage("assets/crystal.svg")
+  crystal: createImage("assets/crystal.svg"),
+  shield: createImage("assets/shield.svg")
 };
 
 const game = {
@@ -35,20 +47,24 @@ const game = {
   paused: false,
   over: false,
   score: 0,
+  highScore: readHighScore(),
   lives: 3,
   level: 1,
   time: 0,
   spawnTimer: 0,
   crystalTimer: 0,
+  shieldTimer: 0,
   flashTimer: 0,
   player: null,
   asteroids: [],
   crystals: [],
+  shields: [],
   stars: []
 };
 
 function updateHud() {
   scoreEl.textContent = Math.floor(game.score);
+  highScoreEl.textContent = Math.max(game.highScore, Math.floor(game.score));
   livesEl.textContent = game.lives;
   levelEl.textContent = game.level;
 }
@@ -60,17 +76,27 @@ function hideOverlay() {
 function showStartOverlay() {
   overlay.classList.remove("hidden");
   overlayTitle.textContent = "准备启程";
-  overlayText.textContent = "使用方向键 / WASD 或下方按钮移动，躲开陨石并收集蓝色晶体。";
+  overlayText.textContent = "使用方向键 / WASD 或下方按钮移动，躲开陨石，收集蓝色晶体和能量护盾。";
   startButton.classList.remove("hidden");
   restartButton.classList.add("hidden");
 }
 
+function updateHighScore() {
+  const finalScore = Math.floor(game.score);
+  if (finalScore > game.highScore) {
+    game.highScore = finalScore;
+    saveHighScore(game.highScore);
+  }
+}
+
 function showGameOverOverlay() {
+  updateHighScore();
   overlay.classList.remove("hidden");
   overlayTitle.textContent = "任务结束";
-  overlayText.textContent = `你获得了 ${Math.floor(game.score)} 分，最高到达 ${game.level} 级。再来一局吧！`;
+  overlayText.textContent = `本局 ${Math.floor(game.score)} 分，历史最高 ${game.highScore} 分，最高到达 ${game.level} 级。再来一局吧！`;
   startButton.classList.add("hidden");
   restartButton.classList.remove("hidden");
+  updateHud();
 }
 
 function resetGame() {
@@ -84,9 +110,11 @@ function resetGame() {
   game.time = 0;
   game.spawnTimer = 0;
   game.crystalTimer = 0;
+  game.shieldTimer = 0;
   game.flashTimer = 0;
   game.asteroids = [];
   game.crystals = [];
+  game.shields = [];
   game.stars = Array.from({ length: 26 }, () => ({
     x: Math.random() * W,
     y: Math.random() * H,
@@ -100,7 +128,8 @@ function resetGame() {
     w: 70,
     h: 70,
     speed: 360,
-    invincible: 0
+    invincible: 0,
+    shield: 0
   };
   updateHud();
   hideOverlay();
@@ -136,8 +165,30 @@ function spawnCrystal() {
   });
 }
 
+function spawnShield() {
+  const size = 42 + Math.random() * 12;
+  game.shields.push({
+    x: Math.random() * (W - size),
+    y: -size,
+    w: size,
+    h: size,
+    vy: 115 + Math.random() * 70,
+    sway: Math.random() * Math.PI * 2,
+    pulse: Math.random() * Math.PI * 2
+  });
+}
+
 function takeHit() {
   if (game.player.invincible > 0) return;
+
+  if (game.player.shield > 0) {
+    game.player.shield = 0;
+    game.player.invincible = 0.8;
+    game.flashTimer = 0.25;
+    updateHud();
+    return;
+  }
+
   game.lives -= 1;
   game.player.invincible = 1.2;
   game.flashTimer = 0.5;
@@ -157,6 +208,7 @@ function update(dt) {
   game.level = 1 + Math.floor(game.time / 15);
   game.score += dt * (5 + game.level * 0.6);
   game.player.invincible = Math.max(0, game.player.invincible - dt);
+  game.player.shield = Math.max(0, game.player.shield - dt);
   game.flashTimer = Math.max(0, game.flashTimer - dt);
 
   const moveX = (input.right ? 1 : 0) - (input.left ? 1 : 0);
@@ -181,6 +233,13 @@ function update(dt) {
     spawnCrystal();
   }
 
+  const shieldInterval = Math.max(5.5, 9.5 - game.level * 0.2);
+  game.shieldTimer += dt;
+  if (game.shieldTimer >= shieldInterval) {
+    game.shieldTimer = 0;
+    spawnShield();
+  }
+
   game.stars.forEach((star) => {
     star.y += star.s * dt;
     if (star.y > H) {
@@ -191,6 +250,7 @@ function update(dt) {
 
   game.asteroids = game.asteroids.filter((a) => a.y < H + a.h + 10);
   game.crystals = game.crystals.filter((c) => c.y < H + c.h + 10);
+  game.shields = game.shields.filter((s) => s.y < H + s.h + 10);
 
   for (const asteroid of game.asteroids) {
     asteroid.y += asteroid.vy * dt;
@@ -211,6 +271,19 @@ function update(dt) {
     if (rectsOverlap(game.player, crystal)) {
       crystal.y = H + 200;
       game.score += 10;
+      updateHud();
+    }
+  }
+
+  for (const shield of game.shields) {
+    shield.y += shield.vy * dt;
+    shield.sway += dt * 3;
+    shield.pulse += dt * 5;
+    shield.x += Math.sin(shield.sway) * 18 * dt;
+    if (rectsOverlap(game.player, shield)) {
+      shield.y = H + 200;
+      game.player.shield = 7;
+      game.score += 5;
       updateHud();
     }
   }
@@ -248,7 +321,31 @@ function drawHudPanel() {
   ctx.fillRect(0, 44, W, 1);
 }
 
+function drawPlayerShield() {
+  if (!game.player || game.player.shield <= 0) return;
+
+  const cx = game.player.x + game.player.w / 2;
+  const cy = game.player.y + game.player.h / 2;
+  const radius = 48 + Math.sin(game.time * 8) * 3;
+  const alpha = Math.min(0.72, 0.32 + game.player.shield * 0.06);
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = "#67e1ff";
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = alpha * 0.28;
+  ctx.fillStyle = "#5ce5ff";
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
 function drawPlayer() {
+  drawPlayerShield();
   if (game.player.invincible > 0 && Math.floor(game.player.invincible * 10) % 2 === 0) {
     ctx.globalAlpha = 0.35;
   }
@@ -276,6 +373,18 @@ function drawCrystals() {
   }
 }
 
+function drawShields() {
+  for (const shield of game.shields) {
+    const scale = 1 + Math.sin(shield.pulse) * 0.06;
+    ctx.save();
+    ctx.translate(shield.x + shield.w / 2, shield.y + shield.h / 2);
+    ctx.rotate(Math.sin(shield.sway) * 0.16);
+    ctx.scale(scale, scale);
+    ctx.drawImage(assets.shield, -shield.w / 2, -shield.h / 2, shield.w, shield.h);
+    ctx.restore();
+  }
+}
+
 function drawEffects() {
   if (game.flashTimer > 0) {
     ctx.fillStyle = `rgba(255, 100, 100, ${game.flashTimer * 0.18})`;
@@ -299,6 +408,7 @@ function render() {
   drawBackground();
   drawHudPanel();
   drawCrystals();
+  drawShields();
   drawAsteroids();
   if (game.player) drawPlayer();
   drawEffects();
@@ -357,5 +467,6 @@ startButton.addEventListener("click", resetGame);
 restartButton.addEventListener("click", resetGame);
 pauseButton.addEventListener("click", togglePause);
 
+updateHud();
 showStartOverlay();
 requestAnimationFrame(loop);
