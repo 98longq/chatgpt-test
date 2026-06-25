@@ -12,10 +12,11 @@
       <div class="topbar">
         <div>
           <h1>星际快递员</h1>
-          <p class="subtitle">驾驶机器人快递员，躲开陨石，收集能量晶体！</p>
+          <p class="subtitle">驾驶机器人快递员，躲开陨石，收集能量晶体和护盾！</p>
         </div>
         <div class="hud-inline">
           <div class="hud-pill">分数 <strong id="score">0</strong></div>
+          <div class="hud-pill">最高分 <strong id="highScore">0</strong></div>
           <div class="hud-pill">生命 <strong id="lives">3</strong></div>
           <div class="hud-pill">等级 <strong id="level">1</strong></div>
         </div>
@@ -28,7 +29,7 @@
             <img id="splashImage" alt="机器人快递员" src="assets/splash-robot.svg" />
             <h2 id="overlayTitle">准备启程</h2>
             <p id="overlayText">
-              使用方向键 / WASD 或下方按钮移动，躲开陨石并收集蓝色晶体。
+              使用方向键 / WASD 或下方按钮移动，躲开陨石，收集蓝色晶体和能量护盾。
             </p>
             <div class="overlay-actions">
               <button id="startButton">开始游戏</button>
@@ -43,7 +44,8 @@
           <h3>玩法说明</h3>
           <ul>
             <li>收集晶体：+10 分</li>
-            <li>坚持飞行会持续得分</li>
+            <li>收集护盾：可抵挡下一次陨石撞击</li>
+            <li>坚持飞行会持续得分，并自动保存最高分</li>
             <li>撞到陨石会损失 1 点生命</li>
             <li>每 15 秒提升 1 个等级，难度会上升</li>
           </ul>
