@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>星际快递员 - ChatGPT 小游戏</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="game-shell">
+      <div class="topbar">
+        <div>
+          <h1>星际快递员</h1>
+          <p class="subtitle">驾驶机器人快递员，躲开陨石，收集能量晶体！</p>
+        </div>
+        <div class="hud-inline">
+          <div class="hud-pill">分数 <strong id="score">0</strong></div>
+          <div class="hud-pill">生命 <strong id="lives">3</strong></div>
+          <div class="hud-pill">等级 <strong id="level">1</strong></div>
+        </div>
+      </div>
+
+      <div class="game-area">
+        <canvas id="gameCanvas" width="960" height="540"></canvas>
+        <div class="overlay" id="overlay">
+          <div class="overlay-card">
+            <img id="splashImage" alt="机器人快递员" src="assets/splash-robot.svg" />
+            <h2 id="overlayTitle">准备启程</h2>
+            <p id="overlayText">
+              使用方向键 / WASD 或下方按钮移动，躲开陨石并收集蓝色晶体。
+            </p>
+            <div class="overlay-actions">
+              <button id="startButton">开始游戏</button>
+              <button id="restartButton" class="secondary hidden">重新开始</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-panel">
+        <div class="tip-box">
+          <h3>玩法说明</h3>
+          <ul>
+            <li>收集晶体：+10 分</li>
+            <li>坚持飞行会持续得分</li>
+            <li>撞到陨石会损失 1 点生命</li>
+            <li>每 15 秒提升 1 个等级，难度会上升</li>
+          </ul>
+        </div>
+
+        <div class="controls-box">
+          <h3>触屏控制</h3>
+          <div class="controls-grid">
+            <button class="ctrl" data-dir="up">↑</button>
+            <div></div>
+            <button class="ctrl" data-dir="left">←</button>
+            <button class="ctrl" data-dir="down">↓</button>
+            <button class="ctrl" data-dir="right">→</button>
+          </div>
+          <div class="control-row">
+            <button id="pauseButton" class="secondary">暂停 / 继续</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
