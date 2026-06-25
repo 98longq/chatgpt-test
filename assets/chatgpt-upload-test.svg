@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-labelledby="title desc">
+  <title id="title">ChatGPT Upload Test</title>
+  <desc id="desc">A friendly robot holding a sign that says GitHub Upload Test.</desc>
+  <rect width="800" height="800" fill="#f7f9fc"/>
+  <ellipse cx="400" cy="700" rx="150" ry="28" fill="#d9e2ef"/>
+
+  <circle cx="400" cy="120" r="18" fill="#5fc3ff" stroke="#1f2d3d" stroke-width="6"/>
+  <rect x="390" y="138" width="20" height="26" rx="10" fill="#1f2d3d"/>
+
+  <rect x="250" y="160" width="300" height="240" rx="120" fill="#ffffff" stroke="#1f2d3d" stroke-width="8"/>
+  <rect x="300" y="210" width="200" height="120" rx="50" fill="#0f1f33"/>
+  <path d="M355 280 Q375 240 395 280" fill="none" stroke="#64d2ff" stroke-width="10" stroke-linecap="round"/>
+  <path d="M405 280 Q425 240 445 280" fill="none" stroke="#64d2ff" stroke-width="10" stroke-linecap="round"/>
+  <path d="M380 315 Q400 332 420 315" fill="none" stroke="#64d2ff" stroke-width="10" stroke-linecap="round"/>
+
+  <rect x="220" y="250" width="45" height="95" rx="20" fill="#d7dfeb" stroke="#1f2d3d" stroke-width="8"/>
+  <rect x="535" y="250" width="45" height="95" rx="20" fill="#d7dfeb" stroke="#1f2d3d" stroke-width="8"/>
+
+  <rect x="300" y="390" width="200" height="170" rx="45" fill="#ffffff" stroke="#1f2d3d" stroke-width="8"/>
+  <circle cx="400" cy="470" r="34" fill="#1f2d3d"/>
+  <path d="M385 455 C385 438 415 438 415 455 C415 470 405 472 405 486 C405 494 411 500 420 500" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="420" cy="503" r="4" fill="#ffffff"/>
+
+  <rect x="165" y="430" width="470" height="150" rx="22" fill="#ffffff" stroke="#1f2d3d" stroke-width="8"/>
+  <text x="400" y="495" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="700" fill="#142033">GitHub</text>
+  <text x="400" y="548" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="700" fill="#142033">Upload Test</text>
+
+  <rect x="145" y="470" width="30" height="70" rx="14" fill="#8a99ad" stroke="#1f2d3d" stroke-width="8"/>
+  <rect x="625" y="470" width="30" height="70" rx="14" fill="#8a99ad" stroke="#1f2d3d" stroke-width="8"/>
+  <rect x="136" y="510" width="36" height="20" rx="10" fill="#8a99ad" stroke="#1f2d3d" stroke-width="8"/>
+  <rect x="628" y="510" width="36" height="20" rx="10" fill="#8a99ad" stroke="#1f2d3d" stroke-width="8"/>
+  <rect x="130" y="548" width="38" height="20" rx="10" fill="#8a99ad" stroke="#1f2d3d" stroke-width="8"/>
+  <rect x="632" y="548" width="38" height="20" rx="10" fill="#8a99ad" stroke="#1f2d3d" stroke-width="8"/>
+
+  <rect x="280" y="560" width="60" height="110" rx="25" fill="#eef3f9" stroke="#1f2d3d" stroke-width="8"/>
+  <rect x="460" y="560" width="60" height="110" rx="25" fill="#eef3f9" stroke="#1f2d3d" stroke-width="8"/>
+  <circle cx="310" cy="600" r="16" fill="#8998ac" stroke="#1f2d3d" stroke-width="8"/>
+  <circle cx="490" cy="600" r="16" fill="#8998ac" stroke="#1f2d3d" stroke-width="8"/>
+  <rect x="265" y="660" width="90" height="35" rx="18" fill="#ffffff" stroke="#1f2d3d" stroke-width="8"/>
+  <rect x="445" y="660" width="90" height="35" rx="18" fill="#ffffff" stroke="#1f2d3d" stroke-width="8"/>
+
+  <text x="400" y="760" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#64748b">ChatGPT generated SVG image</text>
+</svg>
