@@ -10,6 +10,7 @@
   --muted: #9db2d1;
   --accent: #58c5ff;
   --accent-2: #7d6bff;
+  --gold: #ffcc55;
 }
 
 body {
@@ -30,7 +31,7 @@ body {
 }
 
 .game-shell {
-  width: min(1160px, 100%);
+  width: min(1180px, 100%);
   background: rgba(6, 12, 24, 0.86);
   border: 1px solid var(--line);
   border-radius: 24px;
@@ -76,6 +77,12 @@ h1 {
   color: white;
   margin-left: 8px;
   font-size: 1.05rem;
+}
+
+#comboStatus,
+#dashStatus,
+#missionStatus {
+  color: var(--gold);
 }
 
 .game-area {
@@ -206,6 +213,11 @@ button.hidden {
   display: none;
 }
 
+.dash-button {
+  background: linear-gradient(135deg, #ffcc55, #ff7a59);
+  box-shadow: 0 10px 22px rgba(255, 155, 80, 0.25);
+}
+
 .bottom-panel {
   margin-top: 16px;
   display: grid;
@@ -251,6 +263,8 @@ button.hidden {
 .control-row {
   display: flex;
   justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
   margin-top: 12px;
 }
 
