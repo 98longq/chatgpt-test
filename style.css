@@ -61,6 +61,7 @@ h1 {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .hud-pill {
@@ -107,7 +108,9 @@ canvas {
 }
 
 .overlay-card {
-  width: min(520px, calc(100% - 24px));
+  width: min(560px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow: auto;
   padding: 18px;
   border-radius: 24px;
   background: rgba(9, 16, 30, 0.93);
@@ -117,7 +120,7 @@ canvas {
 }
 
 .overlay-card img {
-  width: min(260px, 70%);
+  width: min(230px, 62%);
   border-radius: 20px;
   margin-bottom: 10px;
   filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.35));
@@ -131,6 +134,44 @@ canvas {
 .overlay-card p {
   color: var(--muted);
   line-height: 1.7;
+}
+
+.difficulty-panel {
+  margin: 16px auto 4px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.difficulty-option {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  min-height: 82px;
+  padding: 12px 10px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+.difficulty-option span {
+  font-size: 1.05rem;
+}
+
+.difficulty-option small {
+  color: var(--muted);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.difficulty-option.active {
+  background: linear-gradient(135deg, rgba(88, 197, 255, 0.88), rgba(125, 107, 255, 0.88));
+  border-color: rgba(255, 255, 255, 0.42);
+  box-shadow: 0 10px 24px rgba(82, 158, 255, 0.28);
+}
+
+.difficulty-option.active small {
+  color: rgba(255, 255, 255, 0.84);
 }
 
 .overlay-actions {
@@ -214,7 +255,35 @@ button.hidden {
 }
 
 @media (max-width: 860px) {
+  .topbar {
+    align-items: flex-start;
+  }
+
+  .hud-inline {
+    justify-content: flex-start;
+  }
+
   .bottom-panel {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .page {
+    padding: 10px;
+  }
+
+  .game-shell {
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .difficulty-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .hud-pill {
+    padding: 8px 10px;
+    font-size: 0.92rem;
   }
 }
