@@ -89,6 +89,7 @@ canvas {
   height: auto;
   display: block;
   background: #07101f;
+  touch-action: none;
 }
 
 .overlay {
@@ -150,6 +151,8 @@ button {
   font-size: 1rem;
   font-weight: 700;
   box-shadow: 0 10px 22px rgba(66, 131, 255, 0.25);
+  touch-action: manipulation;
+  user-select: none;
 }
 
 button.secondary {
