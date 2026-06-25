@@ -12,7 +12,7 @@
       <div class="topbar">
         <div>
           <h1>星际快递员</h1>
-          <p class="subtitle">驾驶机器人快递员，躲开陨石，收集晶体、护盾、磁铁和维修包！</p>
+          <p class="subtitle">接包裹、冲刺穿越流星雨，把快递送进星际传送门！</p>
         </div>
         <div class="hud-inline">
           <div class="hud-pill">模式 <strong id="modeLabel">普通</strong></div>
@@ -20,6 +20,9 @@
           <div class="hud-pill">最高分 <strong id="highScore">0</strong></div>
           <div class="hud-pill">生命 <strong id="lives">3</strong></div>
           <div class="hud-pill">等级 <strong id="level">1</strong></div>
+          <div class="hud-pill">任务 <strong id="missionStatus">待接单</strong></div>
+          <div class="hud-pill">连击 <strong id="comboStatus">x1</strong></div>
+          <div class="hud-pill">冲刺 <strong id="dashStatus">可用</strong></div>
           <div class="hud-pill">状态 <strong id="powerStatus">无</strong></div>
         </div>
       </div>
@@ -31,7 +34,7 @@
             <img id="splashImage" alt="机器人快递员" src="assets/splash-robot.svg" />
             <h2 id="overlayTitle">准备启程</h2>
             <p id="overlayText">
-              选择难度后开始任务。躲开陨石，收集蓝色晶体和各种能量道具。
+              选择难度后开始任务。接包裹、找传送门投递，利用冲刺穿过流星雨。
             </p>
             <div class="difficulty-panel" aria-label="难度选择">
               <button class="difficulty-option" data-mode="easy" type="button">
@@ -59,12 +62,11 @@
         <div class="tip-box">
           <h3>玩法说明</h3>
           <ul>
-            <li>收集晶体：+10 分</li>
-            <li>收集护盾：+5 分，并抵挡下一次陨石撞击</li>
-            <li>收集磁铁：+8 分，短时间吸引附近奖励道具</li>
-            <li>收集维修包：+12 分，并回复 1 点生命，满生命时额外加分</li>
-            <li>坚持飞行会持续得分，并自动保存最高分</li>
-            <li>每 15 秒提升 1 个等级，难度会上升</li>
+            <li>接到包裹后，限时送进传送门，可获得大量分数和投递连胜</li>
+            <li>连续拾取奖励会提升连击倍率，受伤或投递超时会中断连击</li>
+            <li>空格键 / 冲刺按钮可短距离冲刺，并获得极短无敌时间</li>
+            <li>流星雨会定期预警，随后横向飞来高速彗星</li>
+            <li>晶体、护盾、磁铁、维修包仍然会帮助你拿高分</li>
           </ul>
         </div>
 
@@ -79,6 +81,7 @@
           </div>
           <div class="control-row">
             <button id="pauseButton" class="secondary">暂停 / 继续</button>
+            <button id="dashButton" class="dash-button">冲刺</button>
           </div>
         </div>
       </div>
